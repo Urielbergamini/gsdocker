@@ -1,0 +1,33 @@
+# Estágio de construção
+FROM node:alpine AS builder
+
+WORKDIR /app
+
+# Copiar apenas o arquivo package.json
+COPY package.json .
+
+# Instalar dependências
+RUN npm install --production
+
+# Estágio de produção
+FROM node:alpine
+
+WORKDIR /app
+
+# Copiar apenas os arquivos necessários do estágio de construção
+COPY --from=builder /app .
+
+# Copiar o aplicativo
+COPY app.js .
+
+# Definir o usuário não privilegiado
+USER node
+
+# Definir variáveis de ambiente
+ENV NODE_ENV=production
+
+# Expor a porta 8080
+EXPOSE 8080
+
+# Comando para iniciar o aplicativo
+CMD ["node", "app.js"]
